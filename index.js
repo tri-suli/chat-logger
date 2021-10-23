@@ -1,11 +1,11 @@
-function chatLogger(record) {
-    var log = [];
+function solution(record) {
+    var answer = [];
     const ACTION_ENTER = 'Enter';
     const ACTION_LEAVE = 'Leave';
     const ACTION_CHANGE = 'Change';
     
     function changeUserNickName (uid, nickname) {
-        log.filter(function (user) {
+        answer.filter(function (user) {
             return user.uid === uid;
         }).forEach(function (user) {
             user.nickname = nickname;
@@ -13,12 +13,20 @@ function chatLogger(record) {
     }
     
     function logRecord (uid, nickname, msg) {
-        log.push({ uid: uid, nickname: nickname, msg: msg });
+        answer.push({ uid: uid, nickname: nickname, msg: msg });
+    }
+    
+    if (record.length > 100000) {
+        throw new Error('Too many arguments.');
     }
     
     for (var k = 0; k < record.length; k++) {
         var inputs = record[k].split(' ');
         const act = inputs[0], uid = inputs[1], nic = inputs[2];
+        
+        if (uid.length > 10 || (nic && nic.length > 10)) {
+            throw new Error('Too many characters.');
+        }
         
         switch (act) {
             case ACTION_ENTER:
@@ -29,15 +37,16 @@ function chatLogger(record) {
                 changeUserNickName(uid, nic);
                 break;
             case ACTION_LEAVE:
-                const user = log.find(function (user) {
+                const user = answer.find(function (user) {
                     return user.uid === uid;
                 });
                 logRecord(uid, user.nickname, 'has left');
                 break;
+            default: throw new Error('Invalid action given.');
         }
     }
     
-    return log.reduce(function (carry, item) {
+    return answer.reduce(function (carry, item) {
         carry.push(`${item.nickname} ${item.msg}`);
         return carry;
     }, []);
